@@ -58,6 +58,15 @@ data Geography a where
     MultiPolygonGeography :: MultiPolygon -> Geography MultiPolygon
 
 deriving instance Eq (Geography a)
+instance Eq (Some Geography) where
+    (==) (Some (PointGeography g1)) (Some (PointGeography g2)) = g1 == g2
+    (==) (Some (LineStringGeography g1)) (Some (LineStringGeography g2)) = g1 == g2
+    (==) (Some (LinearRingGeography g1)) (Some (LinearRingGeography g2)) = g1 == g2
+    (==) (Some (PolygonGeography g1)) (Some (PolygonGeography g2)) = g1 == g2
+    (==) (Some (MultiPointGeography g1)) (Some (MultiPointGeography g2)) = g1 == g2
+    (==) (Some (MultiLineStringGeography g1)) (Some (MultiLineStringGeography g2)) = g1 == g2
+    (==) (Some (MultiPolygonGeography g1)) (Some (MultiPolygonGeography g2)) = g1 == g2
+    (==) _ _ = False
 
 deriving instance Show (Geography a)
 deriving instance Show (Some Geography)
