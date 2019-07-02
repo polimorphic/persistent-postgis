@@ -20,7 +20,7 @@ import Data.ByteString.Builder (toLazyByteString)
 import Data.ByteString.Lazy (toStrict)
 import Data.Geometry.Geos.Instances ()
 import Data.Geometry.Geos.Serialize (readHex, writeHex)
-import Data.Geometry.Geos.Types
+import Data.Geometry.Geos.Geometry
     ( Geometry
         ( LineStringGeometry
         , LinearRingGeometry
