@@ -3,7 +3,7 @@
 module Data.Geometry.Geos.Instances () where
 
 import Data.Aeson (FromJSON, ToJSON)
-import Data.Geometry.Geos.Types
+import Data.Geometry.Geos.Geometry
     ( Coordinate(Coordinate2, Coordinate3)
     , LineString(LineString)
     , LinearRing(LinearRing)
@@ -13,17 +13,6 @@ import Data.Geometry.Geos.Types
     , Point(Point)
     , Polygon(Polygon)
     )
-import GHC.Generics (Generic)
-
-deriving instance Generic Coordinate
-deriving instance Generic Point
-deriving instance Generic LineString
-deriving instance Generic LinearRing
-deriving instance Generic Polygon
-deriving instance Generic MultiPoint
-deriving instance Generic MultiLineString
-deriving instance Generic MultiPolygon
-
 deriving instance FromJSON Coordinate
 deriving instance FromJSON Point
 deriving instance FromJSON LineString
