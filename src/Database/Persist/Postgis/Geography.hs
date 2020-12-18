@@ -1,6 +1,12 @@
 {-# LANGUAGE DeriveAnyClass, DeriveGeneric, FlexibleInstances, GADTs, GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE CPP, LambdaCase, OverloadedStrings, StandaloneDeriving #-}
 
+#if MIN_VERSION_persistent(2,11,0)
+#define PERSISTENT_CUSTOM_VALUE_CONSTRUCTOR PersistLiteralEscaped
+#else
+#define PERSISTENT_CUSTOM_VALUE_CONSTRUCTOR PersistDbSpecific
+#endif
+
 module Database.Persist.Postgis.Geography
     ( Geography
         ( PointGeography
@@ -42,16 +48,10 @@ import Data.Geometry.Geos.Geometry
 import Data.Text (pack)
 import Data.Text.Encoding (decodeUtf8, encodeUtf8Builder)
 import Database.Persist.Sql
-    ( PersistField, PersistFieldSql, PersistValue(PersistDbSpecific), SqlType(SqlOther)
+    ( PersistField, PersistFieldSql, PersistValue(PERSISTENT_CUSTOM_VALUE_CONSTRUCTOR), SqlType(SqlOther)
     , fromPersistValue, sqlType, toPersistValue
     )
 import Web.HttpApiData (FromHttpApiData, ToHttpApiData, parseUrlPiece, toUrlPiece)
-
-#if MIN_VERSION_persistent(2,11,0)
-#define PERSISTENT_CUSTOM_VALUE_CONSTRUCTOR PersistLiteralEscaped
-#else
-#define PERSISTENT_CUSTOM_VALUE_CONSTRUCTOR PersistDbSpecific
-#endif
 
 data Geography a where
     PointGeography :: Point -> Geography Point
@@ -278,3 +278,5 @@ instance PersistFieldSql (Geography MultiPolygon) where
 
 instance PersistFieldSql (Some Geography) where
     sqlType _ = SqlOther "geography"
+
+#undef PERSISTENT_CUSTOM_VALUE_CONSTRUCTOR
