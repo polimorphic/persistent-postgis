@@ -1,5 +1,11 @@
 {-# LANGUAGE DeriveAnyClass, DeriveGeneric, FlexibleInstances, GADTs, GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase, OverloadedStrings, StandaloneDeriving #-}
+{-# LANGUAGE CPP, LambdaCase, OverloadedStrings, StandaloneDeriving #-}
+
+#if MIN_VERSION_persistent(2,11,0)
+#define PERSISTENT_CUSTOM_VALUE_CONSTRUCTOR PersistLiteralEscaped
+#else
+#define PERSISTENT_CUSTOM_VALUE_CONSTRUCTOR PersistDbSpecific
+#endif
 
 module Database.Persist.Postgis.Geography
     ( Geography
@@ -42,11 +48,10 @@ import Data.Geometry.Geos.Geometry
 import Data.Text (pack)
 import Data.Text.Encoding (decodeUtf8, encodeUtf8Builder)
 import Database.Persist.Sql
-    ( PersistField, PersistFieldSql, PersistValue(PersistDbSpecific), SqlType(SqlOther)
+    ( PersistField, PersistFieldSql, PersistValue(PERSISTENT_CUSTOM_VALUE_CONSTRUCTOR), SqlType(SqlOther)
     , fromPersistValue, sqlType, toPersistValue
     )
 import Web.HttpApiData (FromHttpApiData, ToHttpApiData, parseUrlPiece, toUrlPiece)
-
 
 data Geography a where
     PointGeography :: Point -> Geography Point
@@ -218,20 +223,20 @@ instance PersistField (Geography MultiPolygon) where
 instance PersistField (Some Geography) where
     toPersistValue (Some g) = case g of
         PointGeography p ->
-            PersistDbSpecific . writeHex $ PointGeometry p (Just 4326)
+            PERSISTENT_CUSTOM_VALUE_CONSTRUCTOR . writeHex $ PointGeometry p (Just 4326)
         LineStringGeography ls -> 
-            PersistDbSpecific . writeHex $ LineStringGeometry ls (Just 4326)
+            PERSISTENT_CUSTOM_VALUE_CONSTRUCTOR . writeHex $ LineStringGeometry ls (Just 4326)
         LinearRingGeography lr ->
-            PersistDbSpecific . writeHex $ LinearRingGeometry lr (Just 4326)
+            PERSISTENT_CUSTOM_VALUE_CONSTRUCTOR . writeHex $ LinearRingGeometry lr (Just 4326)
         PolygonGeography pl ->
-            PersistDbSpecific . writeHex $ PolygonGeometry pl (Just 4326)
+            PERSISTENT_CUSTOM_VALUE_CONSTRUCTOR . writeHex $ PolygonGeometry pl (Just 4326)
         MultiPointGeography mp ->
-            PersistDbSpecific . writeHex $ MultiPointGeometry mp (Just 4326)
+            PERSISTENT_CUSTOM_VALUE_CONSTRUCTOR . writeHex $ MultiPointGeometry mp (Just 4326)
         MultiLineStringGeography mls ->
-            PersistDbSpecific . writeHex $ MultiLineStringGeometry mls (Just 4326)
+            PERSISTENT_CUSTOM_VALUE_CONSTRUCTOR . writeHex $ MultiLineStringGeometry mls (Just 4326)
         MultiPolygonGeography mpl ->
-            PersistDbSpecific . writeHex $ MultiPolygonGeometry mpl (Just 4326)
-    fromPersistValue (PersistDbSpecific b) = case readHex b of
+            PERSISTENT_CUSTOM_VALUE_CONSTRUCTOR . writeHex $ MultiPolygonGeometry mpl (Just 4326)
+    fromPersistValue (PERSISTENT_CUSTOM_VALUE_CONSTRUCTOR b) = case readHex b of
         Just (Some (PointGeometry p (Just 4326))) ->
             Right . Some $ PointGeography p
         Just (Some (LineStringGeometry ls (Just 4326))) ->
@@ -247,7 +252,7 @@ instance PersistField (Some Geography) where
         Just (Some (MultiPolygonGeometry mpl (Just 4326))) ->
             Right . Some $ MultiPolygonGeography mpl
         _ -> Left "Invalid Geography hex"
-    fromPersistValue _ = Left "Geography values must be converted from PersistDbSpecific"
+    fromPersistValue _ = Left "Geography values must be converted from PERSISTENT_CUSTOM_VALUE_CONSTRUCTOR"
 
 
 instance PersistFieldSql (Geography Point) where
@@ -273,3 +278,5 @@ instance PersistFieldSql (Geography MultiPolygon) where
 
 instance PersistFieldSql (Some Geography) where
     sqlType _ = SqlOther "geography"
+
+#undef PERSISTENT_CUSTOM_VALUE_CONSTRUCTOR
