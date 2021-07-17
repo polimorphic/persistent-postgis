@@ -4,14 +4,14 @@ module Data.Geometry.Geos.Instances () where
 
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Geometry.Geos.Geometry
-    ( Coordinate(Coordinate2, Coordinate3)
-    , LineString(LineString)
-    , LinearRing(LinearRing)
-    , MultiLineString(MultiLineString)
-    , MultiPoint(MultiPoint)
-    , MultiPolygon(MultiPolygon)
-    , Point(Point)
-    , Polygon(Polygon)
+    ( Coordinate
+    , LineString
+    , LinearRing
+    , MultiLineString
+    , MultiPoint
+    , MultiPolygon
+    , Point
+    , Polygon
     )
 deriving instance FromJSON Coordinate
 deriving instance FromJSON Point
